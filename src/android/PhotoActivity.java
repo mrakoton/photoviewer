@@ -22,11 +22,16 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
+import org.json.JSONObject;
+import org.json.JSONException;
+import java.lang.Throwable;
+
 public class PhotoActivity extends Activity {
 	private PhotoViewAttacher mAttacher;
 
 	private ImageView photo;
 	private String imageUrl;
+	private JSONObject options;
 
 	private ImageButton closeBtn;
 	private ImageButton shareBtn;
@@ -42,8 +47,8 @@ public class PhotoActivity extends Activity {
 		// Load the Views
 		findViews();
 
-        // Hide the Share Button
-        shareBtn.setVisibility(View.INVISIBLE);
+    // Hide the Share Button
+    shareBtn.setVisibility(View.INVISIBLE);
 
 		// Change the Activity Title
 		String actTitle = this.getIntent().getStringExtra("title");
@@ -52,6 +57,16 @@ public class PhotoActivity extends Activity {
 		}
 
 		imageUrl = this.getIntent().getStringExtra("url");
+
+		try  {
+			options = new JSONObject(this.getIntent().getStringExtra("options"));
+		} catch (JSONException e) {
+			try  {
+		  	options = new JSONObject("{\"share\":true}");
+		  }
+		  catch (JSONException e2) {
+		  }
+		}
 
 		// Set Button Listeners
 		closeBtn.setOnClickListener(new View.OnClickListener() {
@@ -111,7 +126,18 @@ public class PhotoActivity extends Activity {
 	 */
 	private void hideLoadingAndUpdate() {
 		photo.setVisibility(View.VISIBLE);
-        shareBtn.setVisibility(View.VISIBLE);
+
+		try {
+			if(options.getBoolean("share")) {
+	    	shareBtn.setVisibility(View.VISIBLE);
+	    }
+	    else {
+	    	shareBtn.setVisibility(View.INVISIBLE);	
+	    }
+	  }
+	  catch(JSONException exception) {
+	  	shareBtn.setVisibility(View.INVISIBLE);	
+	  }
 
 		mAttacher.update();
 	}
